@@ -31,4 +31,25 @@ public class MemberRequest {
 			);
 		}
 	}
+
+	public record LoginMemberRequest(
+		String id,
+		String password
+	) {
+		public void validateLoginMemberRequest() {
+			if (this.id == null) {
+				throw new BadRequestException(ErrorResult.DTO_BAD_REQUEST_EXCEPTION);
+			}
+			if (this.password == null) {
+				throw new BadRequestException(ErrorResult.DTO_BAD_REQUEST_EXCEPTION);
+			}
+		}
+
+		public LoginMemberRequestDto toLoginMemberRequestDto() {
+			return new LoginMemberRequestDto(
+				this.id,
+				this.password
+			);
+		}
+	}
 }

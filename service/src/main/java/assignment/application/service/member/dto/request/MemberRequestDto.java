@@ -8,4 +8,11 @@ public class MemberRequestDto {
 	) {
 
 	}
+
+	public record LoginMemberRequestDto(
+		String id,
+		String password
+	) {
+
+	}
 }
