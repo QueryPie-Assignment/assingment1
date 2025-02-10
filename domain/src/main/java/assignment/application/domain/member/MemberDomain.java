@@ -16,6 +16,7 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -120,6 +121,39 @@ public class MemberDomain {
 				throw new UnAuthorizedException(ErrorResult.TOKEN_UNAUTHORIZED_EXCEPTION);
 			}
 		} catch (JwtException e) {
+			throw new UnAuthorizedException(ErrorResult.TOKEN_UNAUTHORIZED_EXCEPTION);
+		}
+	}
+
+	public String extractIdFromRequest(HttpServletRequest request) {
+		// Authorization 헤더 가져오기
+		String authorizationHeader = request.getHeader("Authorization");
+
+		// Authorization 헤더가 비어있거나 "Bearer "로 시작하지 않는 경우 예외 처리
+		if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+			throw new UnAuthorizedException(ErrorResult.TOKEN_UNAUTHORIZED_EXCEPTION);
+		}
+
+		// "Bearer " 이후의 순수한 JWT 토큰 추출
+		String token = authorizationHeader.substring(7).trim();
+
+		try {
+			// JWT 토큰 파싱하여 Subject(ID) 추출
+			Claims claims = Jwts.parser()
+				.setSigningKey(jwtSecret)
+				.parseClaimsJws(token)
+				.getBody();
+
+			String id = claims.getSubject();
+
+			// ID가 정상적으로 추출되지 않았다면 예외 처리
+			if (id == null || id.isEmpty()) {
+				throw new UnAuthorizedException(ErrorResult.TOKEN_UNAUTHORIZED_EXCEPTION);
+			}
+
+			return id;
+
+		} catch (JwtException | IllegalArgumentException e) {
 			throw new UnAuthorizedException(ErrorResult.TOKEN_UNAUTHORIZED_EXCEPTION);
 		}
 	}
