@@ -15,4 +15,11 @@ public class MemberResponse {
 	) {
 
 	}
+
+	public record GetMemberResponse (
+		String id,
+		String userName
+	) {
+
+	}
 }

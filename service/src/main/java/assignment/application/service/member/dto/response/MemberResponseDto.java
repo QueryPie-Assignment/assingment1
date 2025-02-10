@@ -15,4 +15,11 @@ public class MemberResponseDto {
 	) {
 
 	}
+
+	public record GetMemberResponseDto(
+		String id,
+		String userName
+	) {
+
+	}
 }
