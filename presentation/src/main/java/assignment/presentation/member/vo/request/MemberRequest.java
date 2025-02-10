@@ -52,4 +52,51 @@ public class MemberRequest {
 			);
 		}
 	}
+
+	public record LogoutMemberRequest(
+		String id,
+		String accessToken,
+		String refreshToken
+	) {
+		public void validateLogoutMemberRequest() {
+			if (this.id == null) {
+				throw new BadRequestException(ErrorResult.DTO_BAD_REQUEST_EXCEPTION);
+			}
+			if (this.accessToken == null) {
+				throw new BadRequestException(ErrorResult.DTO_BAD_REQUEST_EXCEPTION);
+			}
+			if (this.refreshToken == null) {
+				throw new BadRequestException(ErrorResult.DTO_BAD_REQUEST_EXCEPTION);
+			}
+		}
+
+		public LogoutMemberRequestDto toLogoutMemberRequestDto() {
+			return new LogoutMemberRequestDto(
+				this.id,
+				this.accessToken,
+				this.refreshToken
+			);
+		}
+	}
+
+	public record ReIssueTokenRequest(
+		String id,
+		String refreshToken
+	) {
+		public void validateReIssueTokenRequest() {
+			if (this.id == null) {
+				throw new BadRequestException(ErrorResult.DTO_BAD_REQUEST_EXCEPTION);
+			}
+			if (this.refreshToken == null) {
+				throw new BadRequestException(ErrorResult.DTO_BAD_REQUEST_EXCEPTION);
+			}
+		}
+
+		public ReissueTokenRequestDto toReissueTokenRequestDto() {
+			return new ReissueTokenRequestDto(
+				this.id,
+				this.refreshToken
+			);
+		}
+	}
 }
