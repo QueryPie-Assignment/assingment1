@@ -51,6 +51,8 @@ subprojects {
 
         // JWT
         implementation group: 'io.jsonwebtoken',name:'jjwt',version:'0.9.1'
+        implementation 'javax.xml.bind:jaxb-api:2.3.1'
+        implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.1'
 
         // modelmapper 라이브러리
         implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.3.8'
@@ -112,7 +114,7 @@ project(':domain') {
     bootJar { enabled = false }
     jar {enabled = true }
     dependencies {
-
+        implementation project(':exception')
     }
 }
 
