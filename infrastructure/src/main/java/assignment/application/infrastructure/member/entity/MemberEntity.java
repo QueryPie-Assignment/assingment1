@@ -28,9 +28,12 @@ public class MemberEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long memberSeq;
 
-	@Column(nullable = false, name = "user_name")
-	private String userName;
+	@Column(nullable = false, unique = true, name = "id")
+	private String id;
 
 	@Column(nullable = false, name = "password")
 	private String password;
+
+	@Column(nullable = false, name = "user_name")
+	private String userName;
 }
