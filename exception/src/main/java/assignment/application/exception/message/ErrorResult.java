@@ -22,6 +22,13 @@ public enum ErrorResult {
 		"IPMB002"
 	),
 
+	// 401 UnAuthorized Exception
+	TOKEN_UNAUTHORIZED_EXCEPTION(
+		HttpStatus.UNAUTHORIZED.value(),
+		"올바르지 않은 토큰입니다.",
+		"TU001"
+	),
+
 	// 404 NOT FOUND
 	ID_NOT_FOUND_EXCEPTION(
 		HttpStatus.NOT_FOUND.value(),

@@ -10,6 +10,7 @@ import assignment.application.exception.message.ErrorResult;
 import assignment.application.exception.status.BadRequestException;
 import assignment.application.exception.status.ConflictException;
 import assignment.application.exception.status.NotFoundRequestException;
+import assignment.application.exception.status.UnAuthorizedException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +49,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler({ConflictException.class})
 	public ResponseEntity<ErrorResponse> handleConflictException(final ConflictException exception) {
 		log.error("🔄 Conflict Exception occur: ", exception);
+
+		return makeErrorResponseEntity(exception.getErrorResult());
+	}
+
+	@ExceptionHandler({UnAuthorizedException.class})
+	public ResponseEntity<ErrorResponse> handleUnAuthorizedException(final UnAuthorizedException exception) {
+		log.error("🔑 Unauthorized Exception occur: ", exception);
 
 		return makeErrorResponseEntity(exception.getErrorResult());
 	}
