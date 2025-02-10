@@ -78,53 +78,6 @@ public class MemberDomain {
 			);
 	}
 
-	public long getTokenRemainTime(String token) {
-		Jws<Claims> claimsJws = Jwts.parser()
-			.setSigningKey(jwtSecret)
-			.parseClaimsJws(token);
-
-		Claims claims = claimsJws.getBody();
-		Date expiration = claims.getExpiration();
-		long now = System.currentTimeMillis();
-
-		return expiration.getTime() - now;
-	}
-
-	public void saveBlackListToken(String token, String id, long remainTime) {
-		blackListTemplate.opsForValue()
-			.set(
-				token,
-				id,
-				remainTime,
-				TimeUnit.MILLISECONDS
-			);
-	}
-
-	public void deleteRefreshToken(String id) {
-		redisTemplate.delete(id);
-	}
-
-	public void checkRefreshToken(String refreshToken) {
-		try {
-			Jws<Claims> claimsJws = Jwts.parser()
-				.setSigningKey(jwtSecret)
-				.parseClaimsJws(refreshToken);
-			Claims claims = claimsJws.getBody();
-
-			// RefreshToken 에서 id 추출
-			String id = claims.getSubject();
-
-			// email 로 refreshToken 값 확인
-			String storedRefreshToken = redisTemplate.opsForValue().get(id);
-			if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
-				redisTemplate.delete(id);
-				throw new UnAuthorizedException(ErrorResult.TOKEN_UNAUTHORIZED_EXCEPTION);
-			}
-		} catch (JwtException e) {
-			throw new UnAuthorizedException(ErrorResult.TOKEN_UNAUTHORIZED_EXCEPTION);
-		}
-	}
-
 	public String extractIdFromRequest(HttpServletRequest request) {
 		// Authorization 헤더 가져오기
 		String authorizationHeader = request.getHeader("Authorization");
