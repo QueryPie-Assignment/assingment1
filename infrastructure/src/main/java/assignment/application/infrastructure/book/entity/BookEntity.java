@@ -47,4 +47,13 @@ public class BookEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, name = "book_tag")
 	private BookTag bookTag;
+
+	public BookEntity updateBookEntity(String title, String author, LocalDate publishedDate, BookTag bookTag) {
+		this.title = title;
+		this.author = author;
+		this.publishedDate = publishedDate;
+		this.bookTag = bookTag;
+
+		return this;
+	}
 }
