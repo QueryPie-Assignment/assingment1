@@ -65,13 +65,6 @@ logging:
     dateformat: yyyy-MM-dd HH:mm:ss.SSSz,Asia/Seoul
 
 ---
-spring:
-  servlet:
-    multipart:
-      max-file-size: 100MB
-      max-request-size: 100MB
-
----
 logging:
   level:
     org.hibernate.SQL: DEBUG
