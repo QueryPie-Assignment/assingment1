@@ -9,4 +9,6 @@ public interface MemberEntityRepository {
 	MemberEntity save(MemberEntity memberEntity);
 
 	void isDuplicatedId(String id);
+
+	MemberEntity findById(String id);
 }
