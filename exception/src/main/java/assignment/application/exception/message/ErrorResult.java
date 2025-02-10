@@ -36,6 +36,18 @@ public enum ErrorResult {
 		"INF001"
 	),
 
+	BOOK_SEQ_NOT_FOUND_EXCEPTION(
+		HttpStatus.NOT_FOUND.value(),
+		"존재하지 않는 Book Seq입니다.",
+		"BSN002"
+	),
+
+	BOOK_TAG_NOT_FOUND_EXCEPTION(
+		HttpStatus.NOT_FOUND.value(),
+		"존재하지 않는 Book Tag입니다.",
+		"BTN003"
+	),
+
 	// 409 CONFLICT ERROR
 	ID_DUPLICATION_CONFLICT_EXCEPTION(
 		HttpStatus.CONFLICT.value(),
