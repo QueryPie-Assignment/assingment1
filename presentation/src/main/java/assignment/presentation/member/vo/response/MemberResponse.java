@@ -7,4 +7,12 @@ public class MemberResponse {
 	) {
 
 	}
+
+	public record ReissueTokenResponse(
+		String id,
+		String accessToken,
+		String refreshToken
+	) {
+
+	}
 }
