@@ -56,4 +56,10 @@ public class BookEntity {
 
 		return this;
 	}
+
+	public BookEntity updateIsAvailable(Boolean isAvailable) {
+		this.isAvailable = isAvailable;
+
+		return this;
+	}
 }
