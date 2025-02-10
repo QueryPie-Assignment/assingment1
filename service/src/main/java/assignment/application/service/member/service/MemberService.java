@@ -3,6 +3,9 @@ package assignment.application.service.member.service;
 import static assignment.application.service.member.dto.request.MemberRequestDto.*;
 import static assignment.application.service.member.dto.response.MemberResponseDto.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +14,7 @@ import assignment.application.domain.member.MemberDomain;
 import assignment.application.infrastructure.member.entity.MemberEntity;
 import assignment.application.infrastructure.member.repository.MemberEntityRepository;
 import assignment.application.service.member.mapper.MemberServiceMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -105,5 +109,37 @@ public class MemberService {
 		memberDomain.saveRefreshToken(refreshToken, requestDto.id());
 
 		return new ReissueTokenResponseDto(requestDto.id(), accessToken, refreshToken);
+	}
+
+	@Transactional(readOnly = true)
+	public List<GetMemberResponseDto> getAllMembers(HttpServletRequest servletRequest) {
+		/*
+		 유효성 검사
+
+		 1. Token 추출
+		 2. Member id 존재 확인
+		*/
+		String id = memberDomain.extractIdFromRequest(servletRequest);
+		memberEntityRepository.findById(id);
+
+		return memberEntityRepository.findAll().stream()
+			.map(memberServiceMapper::toGetMemberResponseDto)
+			.collect(Collectors.toList());
+	}
+
+	@Transactional(readOnly = true)
+	public GetMemberResponseDto getMember(HttpServletRequest servletRequest, String id) {
+		/*
+		 유효성 검사
+
+		 1. Token 추출
+		 2. Member headerId 존재 확인
+		 3. Member id 존재 확인
+		*/
+		String headerId = memberDomain.extractIdFromRequest(servletRequest);
+		memberEntityRepository.findById(headerId);
+		MemberEntity memberEntity = memberEntityRepository.findById(id);
+
+		return memberServiceMapper.toGetMemberResponseDto(memberEntity);
 	}
 }
