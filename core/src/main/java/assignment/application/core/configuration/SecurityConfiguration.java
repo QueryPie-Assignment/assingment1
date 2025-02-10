@@ -21,7 +21,7 @@ public class SecurityConfiguration {
 			.authorizeHttpRequests(authorize -> authorize
 				.requestMatchers("/**").permitAll()
 				.anyRequest().authenticated())
-			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
 		return http.build();
 	}
