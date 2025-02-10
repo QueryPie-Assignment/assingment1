@@ -1,5 +1,7 @@
 package assignment.application.infrastructure.member.repository;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import assignment.application.infrastructure.member.entity.MemberEntity;
@@ -11,4 +13,6 @@ public interface MemberEntityRepository {
 	void isDuplicatedId(String id);
 
 	MemberEntity findById(String id);
+
+	List<MemberEntity> findAll();
 }
