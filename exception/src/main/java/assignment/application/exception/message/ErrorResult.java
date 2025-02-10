@@ -16,6 +16,19 @@ public enum ErrorResult {
 		"B001"
 	),
 
+	ID_PASSWORD_MISMATCH_BAD_REQUEST_EXCEPTION(
+		HttpStatus.BAD_REQUEST.value(),
+		"아이디 비밀번호가 틀렸습니다.",
+		"IPMB002"
+	),
+
+	// 404 NOT FOUND
+	ID_NOT_FOUND_EXCEPTION(
+		HttpStatus.NOT_FOUND.value(),
+		"존재하지 않는 아이디입니다.",
+		"INF001"
+	),
+
 	// 409 CONFLICT ERROR
 	ID_DUPLICATION_CONFLICT_EXCEPTION(
 		HttpStatus.CONFLICT.value(),
