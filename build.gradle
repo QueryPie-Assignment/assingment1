@@ -114,6 +114,7 @@ project(':domain') {
     bootJar { enabled = false }
     jar {enabled = true }
     dependencies {
+        implementation project(':infrastructure')
         implementation project(':exception')
     }
 }
