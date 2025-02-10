@@ -47,7 +47,9 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
 			// 개방 URL
 			// TODO TOKEN URL 설정
-			"/**"
+			"/member/save",
+			"/member/reissue-token",
+			"/member/logout"
 		);
 		return new JwtTokenFilter(jwtSecret, permitAllEndpoints, blackListTemplate);
 	}
