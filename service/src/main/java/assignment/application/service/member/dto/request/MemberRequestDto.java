@@ -15,4 +15,19 @@ public class MemberRequestDto {
 	) {
 
 	}
+
+	public record LogoutMemberRequestDto(
+		String id,
+		String accessToken,
+		String refreshToken
+	) {
+
+	}
+
+	public record ReissueTokenRequestDto(
+		String id,
+		String refreshToken
+	) {
+
+	}
 }

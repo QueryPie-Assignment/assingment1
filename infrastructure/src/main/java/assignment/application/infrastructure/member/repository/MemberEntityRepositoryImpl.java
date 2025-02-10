@@ -1,5 +1,6 @@
 package assignment.application.infrastructure.member.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
@@ -44,5 +45,14 @@ public class MemberEntityRepositoryImpl implements MemberEntityRepository {
 				)
 				.fetchOne()
 		).orElseThrow(() -> new BadRequestException(ErrorResult.ID_NOT_FOUND_EXCEPTION));
+	}
+
+	@Override
+	public List<MemberEntity> findAll() {
+		QMemberEntity qMemberEntity = QMemberEntity.memberEntity;
+
+		return queryFactory
+			.selectFrom(qMemberEntity)
+			.fetch();
 	}
 }

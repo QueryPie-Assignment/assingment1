@@ -10,8 +10,13 @@ import org.springframework.stereotype.Component;
 
 import assignment.application.exception.message.ErrorResult;
 import assignment.application.exception.status.BadRequestException;
+import assignment.application.exception.status.UnAuthorizedException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -71,5 +76,85 @@ public class MemberDomain {
 				refreshTokenExpiration,
 				TimeUnit.MILLISECONDS
 			);
+	}
+
+	public long getTokenRemainTime(String token) {
+		Jws<Claims> claimsJws = Jwts.parser()
+			.setSigningKey(jwtSecret)
+			.parseClaimsJws(token);
+
+		Claims claims = claimsJws.getBody();
+		Date expiration = claims.getExpiration();
+		long now = System.currentTimeMillis();
+
+		return expiration.getTime() - now;
+	}
+
+	public void saveBlackListToken(String token, String id, long remainTime) {
+		blackListTemplate.opsForValue()
+			.set(
+				token,
+				id,
+				remainTime,
+				TimeUnit.MILLISECONDS
+			);
+	}
+
+	public void deleteRefreshToken(String id) {
+		redisTemplate.delete(id);
+	}
+
+	public void checkRefreshToken(String refreshToken) {
+		try {
+			Jws<Claims> claimsJws = Jwts.parser()
+				.setSigningKey(jwtSecret)
+				.parseClaimsJws(refreshToken);
+			Claims claims = claimsJws.getBody();
+
+			// RefreshToken 에서 id 추출
+			String id = claims.getSubject();
+
+			// email 로 refreshToken 값 확인
+			String storedRefreshToken = redisTemplate.opsForValue().get(id);
+			if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
+				redisTemplate.delete(id);
+				throw new UnAuthorizedException(ErrorResult.TOKEN_UNAUTHORIZED_EXCEPTION);
+			}
+		} catch (JwtException e) {
+			throw new UnAuthorizedException(ErrorResult.TOKEN_UNAUTHORIZED_EXCEPTION);
+		}
+	}
+
+	public String extractIdFromRequest(HttpServletRequest request) {
+		// Authorization 헤더 가져오기
+		String authorizationHeader = request.getHeader("Authorization");
+
+		// Authorization 헤더가 비어있거나 "Bearer "로 시작하지 않는 경우 예외 처리
+		if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+			throw new UnAuthorizedException(ErrorResult.TOKEN_UNAUTHORIZED_EXCEPTION);
+		}
+
+		// "Bearer " 이후의 순수한 JWT 토큰 추출
+		String token = authorizationHeader.substring(7).trim();
+
+		try {
+			// JWT 토큰 파싱하여 Subject(ID) 추출
+			Claims claims = Jwts.parser()
+				.setSigningKey(jwtSecret)
+				.parseClaimsJws(token)
+				.getBody();
+
+			String id = claims.getSubject();
+
+			// ID가 정상적으로 추출되지 않았다면 예외 처리
+			if (id == null || id.isEmpty()) {
+				throw new UnAuthorizedException(ErrorResult.TOKEN_UNAUTHORIZED_EXCEPTION);
+			}
+
+			return id;
+
+		} catch (JwtException | IllegalArgumentException e) {
+			throw new UnAuthorizedException(ErrorResult.TOKEN_UNAUTHORIZED_EXCEPTION);
+		}
 	}
 }

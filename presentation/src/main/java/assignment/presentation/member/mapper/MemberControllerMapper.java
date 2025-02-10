@@ -10,4 +10,8 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface MemberControllerMapper {
 	LoginMemberResponse toLoginMemberResponse(LoginMemberResponseDto responseDto);
+
+	ReissueTokenResponse toReissueTokenResponse(ReissueTokenResponseDto responseDto);
+
+	GetMemberResponse toGetMemberResponse(GetMemberResponseDto responseDto);
 }

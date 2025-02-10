@@ -1,6 +1,7 @@
 package assignment.application.service.member.mapper;
 
 import static assignment.application.service.member.dto.request.MemberRequestDto.*;
+import static assignment.application.service.member.dto.response.MemberResponseDto.*;
 
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
@@ -16,4 +17,8 @@ public interface MemberServiceMapper {
 	@Mapping(target = "password", source = "encodedPassword")
 	@Mapping(target = "userName", source = "requestDto.userName")
 	MemberEntity toMemberEntity(SaveMemberRequestDto requestDto, String encodedPassword);
+
+	@Mapping(target = "id", source = "memberEntity.id")
+	@Mapping(target = "userName", source = "memberEntity.userName")
+	GetMemberResponseDto toGetMemberResponseDto(MemberEntity memberEntity);
 }

@@ -4,8 +4,13 @@ import static assignment.application.service.member.dto.response.MemberResponseD
 import static assignment.presentation.member.vo.request.MemberRequest.*;
 import static assignment.presentation.member.vo.response.MemberResponse.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +26,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -56,11 +62,13 @@ public class MemberController {
 	@PostMapping("/login")
 	@Operation(summary = "로그인 API", description = "회원 정보를 입력하여 로그인을 진행합니다.")
 	@ApiResponses(value = {
-		@ApiResponse(responseCode = "200", description = "회원가입 성공",
+		@ApiResponse(responseCode = "200", description = "로그인 성공",
 			content = @Content(schema = @Schema(implementation = BaseResponse.class))),
 		@ApiResponse(responseCode = "B001", description = "400 요청 데이터 형식 오류 (BadRequestException 발생)",
 			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
-		@ApiResponse(responseCode = "INF001", description = "404 존재하지 않는 아이디입니다. (BadRequestException 발생)",
+		@ApiResponse(responseCode = "S500", description = "500 서버 오류 (ServerException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "INF001", description = "404 존재하지 않는 아이디입니다. (NotFoundException 발생)",
 			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
 		@ApiResponse(responseCode = "IPMB002", description = "400 아이디 비밀번호가 틀렸습니다. (BadRequestException 발생)",
 			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
@@ -71,6 +79,95 @@ public class MemberController {
 
 		LoginMemberResponseDto responseDto = memberService.loginMember(request.toLoginMemberRequestDto());
 		LoginMemberResponse response = memberControllerMapper.toLoginMemberResponse(responseDto);
+
+		return ResponseEntity.ok().body(BaseResponse.ofSuccess(HttpStatus.OK.value(), response));
+	}
+
+	@PostMapping("/logout")
+	@Operation(summary = "로그아웃 API", description = "로그아웃을 진행합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "사용자 조회 성공",
+			content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+		@ApiResponse(responseCode = "B001", description = "400 요청 데이터 형식 오류 (BadRequestException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "S500", description = "500 서버 오류 (ServerException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "TU001", description = "401 올바르지 않은 토큰입니다. (UnAuthorized Exception 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+	})
+	public ResponseEntity<BaseResponse<String>> logoutMember(@RequestBody LogoutMemberRequest request) {
+		// Request 유효성 검사
+		request.validateLogoutMemberRequest();
+		memberService.logoutMember(request.toLogoutMemberRequestDto());
+
+		return ResponseEntity.ok().body(BaseResponse.ofSuccess(HttpStatus.OK.value(), "SUCCESS"));
+	}
+
+	@PostMapping("/reissue-token")
+	@Operation(summary = "토큰 재발급 API", description = "토큰 재발급을 진행합니다. (RTR 방식 - 로그아웃 시 사용 불가)")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "사용자 조회 성공",
+			content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+		@ApiResponse(responseCode = "B001", description = "400 요청 데이터 형식 오류 (BadRequestException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "S500", description = "500 서버 오류 (ServerException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "INF001", description = "404 존재하지 않는 아이디입니다. (NotFoundException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "TU001", description = "401 올바르지 않은 토큰입니다. (UnAuthorized Exception 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+	})
+	public ResponseEntity<BaseResponse<ReissueTokenResponse>> reissueToken(@RequestBody ReIssueTokenRequest request) {
+		// Request 유효성 검사
+		request.validateReIssueTokenRequest();
+		ReissueTokenResponseDto responseDto = memberService.reissueToken(request.toReissueTokenRequestDto());
+		ReissueTokenResponse response = memberControllerMapper.toReissueTokenResponse(responseDto);
+
+		return ResponseEntity.ok().body(BaseResponse.ofSuccess(HttpStatus.OK.value(), response));
+	}
+
+	@GetMapping()
+	@Operation(summary = "모든 사용자 조회 API", description = "모든 사용자 조회")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "사용자 조회 성공",
+			content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+		@ApiResponse(responseCode = "B001", description = "400 요청 데이터 형식 오류 (BadRequestException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "S500", description = "500 서버 오류 (ServerException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "INF001", description = "404 존재하지 않는 아이디입니다. (NotFoundException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "TU001", description = "401 올바르지 않은 토큰입니다. (UnAuthorized Exception 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+	})
+	public ResponseEntity<BaseResponse<List<GetMemberResponse>>> getAllMembers(HttpServletRequest servletRequest) {
+		List<GetMemberResponse> responses = memberService.getAllMembers(servletRequest).stream()
+			.map(memberControllerMapper::toGetMemberResponse)
+			.collect(Collectors.toList());
+
+		return ResponseEntity.ok().body(BaseResponse.ofSuccess(HttpStatus.OK.value(), responses));
+	}
+
+	@GetMapping("/{id}")
+	@Operation(summary = "특정 사용자 조회 API", description = "특정 사용자 조회")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "사용자 조회 성공",
+			content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+		@ApiResponse(responseCode = "B001", description = "400 요청 데이터 형식 오류 (BadRequestException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "S500", description = "500 서버 오류 (ServerException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "INF001", description = "404 존재하지 않는 아이디입니다. (NotFoundException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "TU001", description = "401 올바르지 않은 토큰입니다. (UnAuthorized Exception 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+	})
+	public ResponseEntity<BaseResponse<GetMemberResponse>> getMember(
+		@PathVariable(name = "id", required = true) String id,
+		HttpServletRequest servletRequest
+	) {
+		GetMemberResponseDto responseDto = memberService.getMember(servletRequest, id);
+		GetMemberResponse response = memberControllerMapper.toGetMemberResponse(responseDto);
 
 		return ResponseEntity.ok().body(BaseResponse.ofSuccess(HttpStatus.OK.value(), response));
 	}

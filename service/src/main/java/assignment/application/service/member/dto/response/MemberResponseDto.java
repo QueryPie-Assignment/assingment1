@@ -7,4 +7,19 @@ public class MemberResponseDto {
 	) {
 
 	}
+
+	public record ReissueTokenResponseDto(
+		String id,
+		String accessToken,
+		String refreshToken
+	) {
+
+	}
+
+	public record GetMemberResponseDto(
+		String id,
+		String userName
+	) {
+
+	}
 }
