@@ -66,51 +66,6 @@ public class MemberService {
 		return new LoginMemberResponseDto(accessToken, refreshToken);
 	}
 
-	@Transactional
-	public void logoutMember(LogoutMemberRequestDto requestDto) {
-		/*
-		 유효성 검사
-
-		 1. Member id 존재 확인
-		*/
-		MemberEntity memberEntity = memberEntityRepository.findById(requestDto.id());
-
-		// Token Remain Time 계산
-		long accessTokenRemainTime = memberDomain.getTokenRemainTime(requestDto.accessToken());
-		long refreshTokenRemainTime = memberDomain.getTokenRemainTime(requestDto.refreshToken());
-
-		// 해당 토큰들 BlackList에 저장 (악의적 사용 통제)
-		memberDomain.saveBlackListToken(requestDto.accessToken(), memberEntity.getId(), accessTokenRemainTime);
-		memberDomain.saveBlackListToken(requestDto.refreshToken(), memberEntity.getId(), refreshTokenRemainTime);
-
-		// RefreshToken 삭제
-		memberDomain.deleteRefreshToken(memberEntity.getId());
-	}
-
-	@Transactional
-	public ReissueTokenResponseDto reissueToken(ReissueTokenRequestDto requestDto) {
-		/*
-		 유효성 검사
-
-		 1. Member id 존재 확인
-		 2. RefreshToken 유효성 확인
-		*/
-		memberEntityRepository.findById(requestDto.id());
-		memberDomain.checkRefreshToken(requestDto.refreshToken());
-
-		// Redis 삭제
-		memberDomain.deleteRefreshToken(requestDto.id());
-
-		// Jwt Token 생성
-		String accessToken = memberDomain.generateAccessToken(requestDto.id());
-		String refreshToken = memberDomain.generateRefreshToken(requestDto.id());
-
-		// Redis 갱신
-		memberDomain.saveRefreshToken(refreshToken, requestDto.id());
-
-		return new ReissueTokenResponseDto(requestDto.id(), accessToken, refreshToken);
-	}
-
 	@Transactional(readOnly = true)
 	public List<GetMemberResponseDto> getAllMembers(HttpServletRequest servletRequest) {
 		/*

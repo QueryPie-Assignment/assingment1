@@ -15,4 +15,10 @@ public class BookDomain {
 			throw new BadRequestException(ErrorResult.BOOK_TAG_NOT_FOUND_EXCEPTION);
 		}
 	}
+
+	public void validateIsAvailable(Boolean isAvailable) {
+		if(!isAvailable) {
+			throw new BadRequestException(ErrorResult.ALREADY_LOAN_BAD_REQUEST_EXCEPTION);
+		}
+	}
 }

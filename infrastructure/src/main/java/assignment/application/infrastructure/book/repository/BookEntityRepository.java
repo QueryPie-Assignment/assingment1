@@ -20,4 +20,6 @@ public interface BookEntityRepository {
 	List<BookEntity> findBooksByTag(BookTag bookTag);
 
 	void deleteBook(BookEntity bookEntity);
+
+	List<BookEntity> findByAuthor(String author);
 }

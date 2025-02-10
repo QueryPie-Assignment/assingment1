@@ -94,12 +94,28 @@ public class BookService {
 
 		 1. Token 유효성 검사
 		 2. Member 유효성 검사
-		 3. Tag 검사
 		*/
 		String id = memberDomain.extractIdFromRequest(servletRequest);
 		memberEntityRepository.findById(id);
 
 		return bookEntityRepository.findBooksByTag(bookTag).stream()
+			.map(bookServiceMapper::toGetBookResponseDto)
+			.collect(Collectors.toList());
+	}
+
+	@Transactional(readOnly = true)
+	public List<GetBookResponseDto> getBooksByAuthor(HttpServletRequest servletRequest, String author) {
+		/*
+		 유효성 검사
+
+		 1. Token 유효성 검사
+		 2. Member 유효성 검사
+		*/
+		String id = memberDomain.extractIdFromRequest(servletRequest);
+		memberEntityRepository.findById(id);
+
+		// Book Entity 조회
+		return bookEntityRepository.findByAuthor(author).stream()
 			.map(bookServiceMapper::toGetBookResponseDto)
 			.collect(Collectors.toList());
 	}

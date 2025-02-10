@@ -74,7 +74,8 @@ public class BookController {
 		SaveBookResponseDto responseDto = bookService.saveBook(servletRequest, request.toSaveBookRequestDto(), bookTag);
 		SaveBookResponse response = bookControllerMapper.toSaveBookResponse(responseDto);
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(BaseResponse.ofSuccess(HttpStatus.OK.value(), response));
+		return ResponseEntity.status(HttpStatus.CREATED)
+			.body(BaseResponse.ofSuccess(HttpStatus.CREATED.value(), response));
 	}
 
 	@GetMapping("/{bookSeq}")
@@ -151,6 +152,34 @@ public class BookController {
 		@RequestParam(name = "bookTag", required = true) BookTag bookTag
 	) {
 		List<GetBookResponseDto> responseDto = bookService.getBooksByTag(servletRequest, bookTag);
+		List<GetBookResponse> response = responseDto.stream()
+			.map(bookControllerMapper::toGetBookResponse)
+			.collect(Collectors.toList());
+
+		return ResponseEntity.ok().body(BaseResponse.ofSuccess(HttpStatus.OK.value(), response));
+	}
+
+	@GetMapping("/search")
+	@Operation(summary = "저자 이름으로 도서 조회 API", description = "저자 이름으로 조회를 진행합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "도서 조회 성공",
+			content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+		@ApiResponse(responseCode = "B001", description = "400 요청 데이터 형식 오류 (BadRequestException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "S500", description = "500 서버 오류 (ServerException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "INF001", description = "404 존재하지 않는 아이디입니다. (NotFoundException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "TU001", description = "401 올바르지 않은 토큰입니다. (UnAuthorized Exception 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "BTN003", description = "404 존재하지 않는 Book Tag입니다. (NotFoundException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+	})
+	public ResponseEntity<BaseResponse<List<GetBookResponse>>> getBooksByAuthor(
+		HttpServletRequest servletRequest,
+		@RequestParam(name = "author", required = true) String author
+	) {
+		List<GetBookResponseDto> responseDto = bookService.getBooksByAuthor(servletRequest, author);
 		List<GetBookResponse> response = responseDto.stream()
 			.map(bookControllerMapper::toGetBookResponse)
 			.collect(Collectors.toList());

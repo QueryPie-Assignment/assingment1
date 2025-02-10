@@ -74,4 +74,15 @@ public class BookEntityRepositoryImpl implements BookEntityRepository {
 	public void deleteBook(BookEntity bookEntity) {
 		bookEntityJpaRepository.delete(bookEntity);
 	}
+
+	@Override
+	public List<BookEntity> findByAuthor(String author) {
+		QBookEntity qBookEntity = QBookEntity.bookEntity;
+
+		return queryFactory
+			.selectFrom(qBookEntity)
+			.where(
+				qBookEntity.author.eq(author)
+			).fetch();
+	}
 }

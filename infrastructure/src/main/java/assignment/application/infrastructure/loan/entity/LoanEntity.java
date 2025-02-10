@@ -33,7 +33,7 @@ public class LoanEntity {
 	@Id
 	@Column(name = "loan_seq")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long bookSeq;
+	private Long loanSeq;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "member_seq")

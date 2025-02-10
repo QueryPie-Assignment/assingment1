@@ -1,25 +1,23 @@
-package assignment.presentation.member.controller;
+package assignment.presentation.loan.contoller;
 
-import static assignment.application.service.member.dto.response.MemberResponseDto.*;
-import static assignment.presentation.member.vo.request.MemberRequest.*;
-import static assignment.presentation.member.vo.response.MemberResponse.*;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import static assignment.application.service.loan.dto.response.LoanResponseDto.*;
+import static assignment.presentation.loan.vo.request.LoanRequest.*;
+import static assignment.presentation.loan.vo.response.LoanResponse.*;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import assignment.application.exception.GlobalExceptionHandler;
-import assignment.application.service.member.service.MemberService;
+import assignment.application.service.loan.service.LoanService;
 import assignment.presentation.base.BaseResponse;
-import assignment.presentation.member.mapper.MemberControllerMapper;
+import assignment.presentation.loan.mapper.LoanControllerMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -27,67 +25,54 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/member")
-@Tag(name = "회원")
-public class MemberController {
-	private final MemberService memberService;
+@RequestMapping("/loan")
+@Tag(name = "대출")
+public class LoanController {
+	private final LoanService loanService;
 
-	private final MemberControllerMapper memberControllerMapper;
+	private final LoanControllerMapper loanControllerMapper;
 
 	@PostMapping()
-	@Operation(summary = "회원가입 API", description = "회원 정보를 입력하여 가입을 진행합니다.")
+	@Operation(summary = "대출 등록 API", description = "도서 정보를 입력하여 대출을 진행합니다.")
 	@ApiResponses(value = {
-		@ApiResponse(responseCode = "201", description = "201 회원가입 성공",
+		@ApiResponse(responseCode = "201", description = "대출 성공",
 			content = @Content(schema = @Schema(implementation = BaseResponse.class))),
 		@ApiResponse(responseCode = "B001", description = "400 요청 데이터 형식 오류 (BadRequestException 발생)",
 			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
-		@ApiResponse(responseCode = "IDC001", description = "409 중복된 ID (ConflictException 발생)",
-			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
 		@ApiResponse(responseCode = "S500", description = "500 서버 오류 (ServerException 발생)",
-			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)))
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "INF001", description = "404 존재하지 않는 아이디입니다. (NotFoundException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "TU001", description = "401 올바르지 않은 토큰입니다. (UnAuthorized Exception 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "BSN002", description = "404 존재하지 않는 Book Seq입니다. (NotFoundException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "ALB003", description = "400 이미 대출 받은 책 입니다. (BadRequestException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
 	})
-	public ResponseEntity<BaseResponse<String>> saveMember(@RequestBody SaveMemberRequest request) {
+	public ResponseEntity<BaseResponse<String>> saveLoan(
+		@Valid
+		@RequestBody SaveLoanRequest request,
+		HttpServletRequest servletRequest
+	) {
 		// Request 유효성 검사
-		request.validateSaveMemberRequest();
+		request.validateSaveLoanRequest();
 
-		memberService.saveMember(request.toSaveMemberRequestDto());
+		loanService.saveLoan(servletRequest, request.toSaveLoanRequestDto());
 
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.body(BaseResponse.ofSuccess(HttpStatus.CREATED.value(), "SUCCESS"));
 	}
 
-	@PostMapping("/login")
-	@Operation(summary = "로그인 API", description = "회원 정보를 입력하여 로그인을 진행합니다.")
-	@ApiResponses(value = {
-		@ApiResponse(responseCode = "200", description = "로그인 성공",
-			content = @Content(schema = @Schema(implementation = BaseResponse.class))),
-		@ApiResponse(responseCode = "B001", description = "400 요청 데이터 형식 오류 (BadRequestException 발생)",
-			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
-		@ApiResponse(responseCode = "S500", description = "500 서버 오류 (ServerException 발생)",
-			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
-		@ApiResponse(responseCode = "INF001", description = "404 존재하지 않는 아이디입니다. (NotFoundException 발생)",
-			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
-		@ApiResponse(responseCode = "IPMB002", description = "400 아이디 비밀번호가 틀렸습니다. (BadRequestException 발생)",
-			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
-	})
-	public ResponseEntity<BaseResponse<LoginMemberResponse>> loginMember(@RequestBody LoginMemberRequest request) {
-		// Request 유효성 검사
-		request.validateLoginMemberRequest();
-
-		LoginMemberResponseDto responseDto = memberService.loginMember(request.toLoginMemberRequestDto());
-		LoginMemberResponse response = memberControllerMapper.toLoginMemberResponse(responseDto);
-
-		return ResponseEntity.ok().body(BaseResponse.ofSuccess(HttpStatus.OK.value(), response));
-	}
-
 	@GetMapping()
-	@Operation(summary = "모든 사용자 조회 API", description = "모든 사용자 조회")
+	@Operation(summary = "대출 상태 확인 API", description = "도서 정보를 입력하여 대출 상태 확인을 진행합니다.")
 	@ApiResponses(value = {
-		@ApiResponse(responseCode = "200", description = "사용자 조회 성공",
+		@ApiResponse(responseCode = "200", description = "대출 상태 확인 성공",
 			content = @Content(schema = @Schema(implementation = BaseResponse.class))),
 		@ApiResponse(responseCode = "B001", description = "400 요청 데이터 형식 오류 (BadRequestException 발생)",
 			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
@@ -97,36 +82,48 @@ public class MemberController {
 			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
 		@ApiResponse(responseCode = "TU001", description = "401 올바르지 않은 토큰입니다. (UnAuthorized Exception 발생)",
 			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
-	})
-	public ResponseEntity<BaseResponse<List<GetMemberResponse>>> getAllMembers(HttpServletRequest servletRequest) {
-		List<GetMemberResponse> responses = memberService.getAllMembers(servletRequest).stream()
-			.map(memberControllerMapper::toGetMemberResponse)
-			.collect(Collectors.toList());
-
-		return ResponseEntity.ok().body(BaseResponse.ofSuccess(HttpStatus.OK.value(), responses));
-	}
-
-	@GetMapping("/{id}")
-	@Operation(summary = "특정 사용자 조회 API", description = "특정 사용자 조회")
-	@ApiResponses(value = {
-		@ApiResponse(responseCode = "200", description = "사용자 조회 성공",
-			content = @Content(schema = @Schema(implementation = BaseResponse.class))),
-		@ApiResponse(responseCode = "B001", description = "400 요청 데이터 형식 오류 (BadRequestException 발생)",
-			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
-		@ApiResponse(responseCode = "S500", description = "500 서버 오류 (ServerException 발생)",
-			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
-		@ApiResponse(responseCode = "INF001", description = "404 존재하지 않는 아이디입니다. (NotFoundException 발생)",
-			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
-		@ApiResponse(responseCode = "TU001", description = "401 올바르지 않은 토큰입니다. (UnAuthorized Exception 발생)",
+		@ApiResponse(responseCode = "BSN002", description = "404 존재하지 않는 Book Seq입니다. (NotFoundException 발생)",
 			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
 	})
-	public ResponseEntity<BaseResponse<GetMemberResponse>> getMember(
-		@PathVariable(name = "id", required = true) String id,
+	public ResponseEntity<BaseResponse<CheckLoanResponse>> checkLoan(
+		@Valid
+		@RequestParam(name = "bookSeq") Long bookSeq,
 		HttpServletRequest servletRequest
 	) {
-		GetMemberResponseDto responseDto = memberService.getMember(servletRequest, id);
-		GetMemberResponse response = memberControllerMapper.toGetMemberResponse(responseDto);
+		CheckLoanResponseDto responseDto = loanService.checkLoan(servletRequest, bookSeq);
+		CheckLoanResponse response = loanControllerMapper.toCheckLoanResponse(responseDto);
 
 		return ResponseEntity.ok().body(BaseResponse.ofSuccess(HttpStatus.OK.value(), response));
+	}
+
+	@DeleteMapping()
+	@Operation(summary = "도서 반납 API", description = "도서 정보를 입력하여 도서 반납을 진행합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "도서 반납 성공",
+			content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+		@ApiResponse(responseCode = "B001", description = "400 요청 데이터 형식 오류 (BadRequestException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "S500", description = "500 서버 오류 (ServerException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "INF001", description = "404 존재하지 않는 아이디입니다. (NotFoundException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "TU001", description = "401 올바르지 않은 토큰입니다. (UnAuthorized Exception 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "BSN002", description = "404 존재하지 않는 Book Seq입니다. (NotFoundException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+		@ApiResponse(responseCode = "LBN004", description = "404 해당 회원이 빌린 책이 없습니다. (NotFoundException 발생)",
+			content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+	})
+	public ResponseEntity<BaseResponse<String>> deleteLoan(
+		@Valid
+		@RequestBody DeleteLoanRequest request,
+		HttpServletRequest servletRequest
+	) {
+		// Request 유효성 검사
+		request.validateDeleteLoanRequest();
+
+		loanService.deleteLoan(servletRequest, request.toDeleteLoanRequestDto());
+
+		return ResponseEntity.ok().body(BaseResponse.ofSuccess(HttpStatus.OK.value(), "SUCCESS"));
 	}
 }

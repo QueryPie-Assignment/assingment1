@@ -22,6 +22,12 @@ public enum ErrorResult {
 		"IPMB002"
 	),
 
+	ALREADY_LOAN_BAD_REQUEST_EXCEPTION(
+		HttpStatus.BAD_REQUEST.value(),
+		"이미 대출 받은 책 입니다.",
+		"ALB003"
+	),
+
 	// 401 UnAuthorized Exception
 	TOKEN_UNAUTHORIZED_EXCEPTION(
 		HttpStatus.UNAUTHORIZED.value(),
@@ -47,6 +53,13 @@ public enum ErrorResult {
 		"존재하지 않는 Book Tag입니다.",
 		"BTN003"
 	),
+
+	LOAN_BOOK_NOT_FOUND_EXCEPTION(
+		HttpStatus.NOT_FOUND.value(),
+		"해당 회원이 빌린 책이 없습니다.",
+		"LBN004"
+	),
+
 
 	// 409 CONFLICT ERROR
 	ID_DUPLICATION_CONFLICT_EXCEPTION(
