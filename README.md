@@ -37,7 +37,7 @@ server:
 
 spring:
   profiles:
-    active: local
+    active: production
     group:
       local: local
       production: production
