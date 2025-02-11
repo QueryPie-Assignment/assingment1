@@ -37,14 +37,17 @@ server:
 
 spring:
   profiles:
-    active: production
+    active: local
     group:
       local: local
       production: production
 
+  cache:
+    type: redis
+
 jwt:
   secret: YOUR_SECRET_KEY
-  accessTokenExpiration: 1800000
+  accessTokenExpiration: 3600000
   refreshTokenExpiration: 2592000000
 
 ---
@@ -63,6 +66,13 @@ logging:
           EC2MetadataUtils: error
   pattern:
     dateformat: yyyy-MM-dd HH:mm:ss.SSSz,Asia/Seoul
+
+---
+spring:
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
 
 ---
 logging:
