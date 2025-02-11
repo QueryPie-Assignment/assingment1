@@ -120,6 +120,6 @@ spring:
 <br>
 
 ## 🛠 3. Swagger API 문서 확인
-- API 명세서서: http://localhost:8080/swagger-ui/index.html#/
+- API 명세서: http://localhost:8080/swagger-ui/index.html#/
 
 ---
