@@ -44,7 +44,7 @@ spring:
 
 jwt:
   secret: YOUR_SECRET_KEY
-  accessTokenExpiration: 86400000
+  accessTokenExpiration: 1800000
   refreshTokenExpiration: 2592000000
 
 ---
