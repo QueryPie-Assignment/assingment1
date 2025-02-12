@@ -10,7 +10,7 @@ subprojects {
     apply plugin: 'io.spring.dependency-management'
     apply plugin: 'application'
 
-    mainClassName = 'assignment1.presentation.Assignment1Application'
+    mainClassName = 'assignment.presentation.AssignmentApplication'
     group = 'query-pie'
     version = '0.0.1-SNAPSHOT'
 
