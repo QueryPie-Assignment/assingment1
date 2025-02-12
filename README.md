@@ -123,3 +123,26 @@ spring:
 - API 명세서: http://localhost:8080/swagger-ui/index.html#/
 - **LOCAL 에서 돌아가지 않을 시 배포 된 API Swagger**: https://euics.co.kr/swagger-ui/index.html#/
 ---
+<br>
+
+## 🛠 4. MySQL Workbench를 이용한 데이터베이스 접속 방법
+
+본 프로젝트의 데이터베이스(MySQL)에 **MySQL Workbench**를 사용하여 접속하는 방법을 설명합니다.
+
+---
+<br>
+
+
+## 📌 (1). MySQL Workbench를 이용한 접속 방법
+
+1. **MySQL Workbench 실행**
+2. "MySQL Connections"에서 "+" 버튼(새로운 연결 추가) 클릭
+3. 아래 정보 입력:
+   - **Connection Name**: (자유롭게 설정 가능)
+   - **Connection Method**: `Standard (TCP/IP)`
+   - **Hostname**: `43.203.56.163`
+   - **Port**: `3306`
+   - **Username**: `root`
+   - **Password**: `assignment1!`
+4. **"Test Connection"** 버튼 클릭 후 연결 확인
+
