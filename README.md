@@ -121,5 +121,5 @@ spring:
 
 ## 🛠 3. Swagger API 문서 확인
 - API 명세서: http://localhost:8080/swagger-ui/index.html#/
-
+- **LOCAL 에서 돌아가지 않을 시 배포 된 API Swagger**: https://euics.co.kr/swagger-ui/index.html#/
 ---
